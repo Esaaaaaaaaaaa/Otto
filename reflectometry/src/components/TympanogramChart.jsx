@@ -7,15 +7,13 @@ import {
   CartesianGrid,
   ResponsiveContainer,
   Tooltip,
-  ReferenceArea,
-  ReferenceLine,
 } from 'recharts';
 
 /**
- * Tympanogram-style reflectivity chart.
- * Displays the reflectivity curve across frequency with reference zones.
+ * Reflectivity chart.
+ * Displays the raw reflectivity curve across frequency.
  */
-export default function TympanogramChart({ reflectivityData, classification, height = 250 }) {
+export default function TympanogramChart({ reflectivityData, height = 250 }) {
   if (!reflectivityData) return null;
 
   const { frequencies, reflectivity } = reflectivityData;
@@ -30,52 +28,13 @@ export default function TympanogramChart({ reflectivityData, classification, hei
     });
   }
 
-  const typeColor = classification?.color || '#14b8a6';
-
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium text-clinical-muted">Reflectivity Curve</h4>
-        {classification && (
-          <span
-            className="text-xs font-bold px-2.5 py-1 rounded-full"
-            style={{
-              backgroundColor: `${typeColor}20`,
-              color: typeColor,
-              border: `1px solid ${typeColor}40`,
-            }}
-          >
-            {classification.type}
-          </span>
-        )}
-      </div>
+      <h4 className="text-sm font-medium text-clinical-muted">Reflectivity Curve</h4>
       <div className="bg-clinical-bg rounded-lg p-2 border border-clinical-border">
         <ResponsiveContainer width="100%" height={height}>
           <LineChart data={chartData} margin={{ top: 10, right: 10, bottom: 5, left: -10 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#1f293755" />
-
-            {/* Normal range reference area */}
-            <ReferenceArea
-              y1={15}
-              y2={45}
-              fill="#10b981"
-              fillOpacity={0.05}
-              stroke="none"
-            />
-
-            {/* Effusion threshold */}
-            <ReferenceLine
-              y={60}
-              stroke="#ef444480"
-              strokeDasharray="5 5"
-              label={{
-                value: 'Effusion threshold',
-                position: 'right',
-                fill: '#ef444480',
-                fontSize: 10,
-              }}
-            />
-
             <XAxis
               dataKey="frequency"
               tick={{ fill: '#6b7280', fontSize: 10 }}
@@ -114,7 +73,7 @@ export default function TympanogramChart({ reflectivityData, classification, hei
             <Line
               type="monotone"
               dataKey="reflectivity"
-              stroke={typeColor}
+              stroke="#14b8a6"
               strokeWidth={2.5}
               dot={false}
               isAnimationActive={true}

@@ -4,7 +4,7 @@ import TympanogramChart from './TympanogramChart';
 
 /**
  * Step 3: Results panel.
- * Displays the classification, reflectivity curve, and clinical notes.
+ * Displays raw reflectivity data — charts and band values only.
  */
 export default function ResultsPanel({
   results,
@@ -14,24 +14,18 @@ export default function ResultsPanel({
 }) {
   if (!results) return null;
 
-  const { classification, reflectivity, bands, ear } = results;
+  const { reflectivity, bands, ear } = results;
 
   return (
     <div className="panel-enter space-y-6">
       {/* Header */}
       <div className="text-center space-y-3">
-        <div
-          className="mx-auto w-20 h-20 rounded-2xl flex items-center justify-center"
-          style={{ backgroundColor: `${classification.color}15` }}
-        >
-          <Activity className="w-10 h-10" style={{ color: classification.color }} />
+        <div className="mx-auto w-20 h-20 rounded-2xl flex items-center justify-center bg-clinical-accent/10">
+          <Activity className="w-10 h-10 text-clinical-accent" />
         </div>
         <div>
-          <h2
-            className="text-2xl font-bold"
-            style={{ color: classification.color }}
-          >
-            {classification.description}
+          <h2 className="text-2xl font-bold text-clinical-heading">
+            Reflectometry Results
           </h2>
           <p className="text-sm text-clinical-muted mt-1 capitalize">
             {ear} ear
@@ -39,29 +33,9 @@ export default function ResultsPanel({
         </div>
       </div>
 
-      {/* Confidence */}
-      <div className="bg-clinical-surface border border-clinical-border rounded-xl p-4 space-y-2">
-        <div className="flex justify-between text-sm">
-          <span className="text-clinical-muted">Confidence</span>
-          <span className="font-medium text-clinical-text">
-            {Math.round(classification.confidence * 100)}%
-          </span>
-        </div>
-        <div className="h-2 bg-clinical-border rounded-full overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all duration-500"
-            style={{
-              width: `${classification.confidence * 100}%`,
-              backgroundColor: classification.color,
-            }}
-          />
-        </div>
-      </div>
-
       {/* Reflectivity Chart */}
       <TympanogramChart
         reflectivityData={reflectivity}
-        classification={classification}
         height={220}
       />
 
