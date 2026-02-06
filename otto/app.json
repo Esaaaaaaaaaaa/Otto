@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "Otto",
+    "slug": "otto",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "otto",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.otto.otoscope",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Otto uses the camera as an otoscope viewer for ear examination training."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#000000"
+      },
+      "package": "com.otto.otoscope",
+      "permissions": ["CAMERA"]
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Otto uses the camera as an otoscope viewer for ear examination training."
+        }
+      ],
+      "expo-router"
+    ]
+  }
+}
