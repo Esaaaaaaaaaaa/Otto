@@ -34,6 +34,13 @@ export function useAudioEngine() {
         await ctx.resume();
       }
 
+      // Check for secure context (HTTPS required for getUserMedia on mobile)
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error(
+          'Microphone access requires HTTPS. Please access this page via https:// URL.'
+        );
+      }
+
       // Request microphone
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
