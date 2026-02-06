@@ -1,9 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-/**
- * Real-time audio level meter.
- * Shows the current microphone input level as a horizontal bar.
- */
 export default function SignalIndicator({ audioEngine, active = false }) {
   const [level, setLevel] = useState(0);
   const animFrameRef = useRef(null);
@@ -17,13 +13,11 @@ export default function SignalIndicator({ audioEngine, active = false }) {
     const update = () => {
       const data = audioEngine.getRealtimeTimeDomainData();
       if (data) {
-        // Compute RMS level
         let sum = 0;
         for (let i = 0; i < data.length; i++) {
           sum += data[i] * data[i];
         }
         const rms = Math.sqrt(sum / data.length);
-        // Convert to 0-1 scale (with some gain for visibility)
         const normalized = Math.min(1, rms * 5);
         setLevel(normalized);
       }
@@ -63,9 +57,9 @@ export default function SignalIndicator({ audioEngine, active = false }) {
           {getLabel()}
         </span>
       </div>
-      <div className="h-3 bg-clinical-border rounded-full overflow-hidden">
+      <div className="h-2 bg-clinical-border rounded overflow-hidden">
         <div
-          className={`h-full rounded-full transition-all duration-75 ${getColor()}`}
+          className={`h-full rounded transition-all duration-75 ${getColor()}`}
           style={{ width: `${Math.max(2, level * 100)}%` }}
         />
       </div>

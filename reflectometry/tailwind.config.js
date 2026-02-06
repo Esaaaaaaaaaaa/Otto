@@ -8,17 +8,17 @@ export default {
     extend: {
       colors: {
         clinical: {
-          bg: '#0a0f1a',
-          surface: '#111827',
-          border: '#1f2937',
-          muted: '#6b7280',
-          text: '#e5e7eb',
-          heading: '#f9fafb',
-          accent: '#14b8a6',
-          'accent-dim': '#0d9488',
-          success: '#10b981',
-          warning: '#f59e0b',
-          danger: '#ef4444',
+          bg: '#f7f8fa',
+          surface: '#ffffff',
+          border: '#e2e5ea',
+          muted: '#7c8494',
+          text: '#374151',
+          heading: '#111827',
+          accent: '#0f766e',
+          'accent-dim': '#115e59',
+          success: '#059669',
+          warning: '#d97706',
+          danger: '#dc2626',
         }
       }
     },

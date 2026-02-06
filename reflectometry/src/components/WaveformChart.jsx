@@ -9,24 +9,18 @@ import {
   Tooltip,
 } from 'recharts';
 
-/**
- * Real-time waveform (time-domain) visualization.
- * Shows the raw audio waveform from the microphone.
- * Separate from FrequencyChart — this is one of the "two sep graphs".
- */
 export default function WaveformChart({
   audioEngine,
   live = false,
   staticData = null,
   title = 'Waveform',
   height = 160,
-  color = '#f59e0b',
+  color = '#d97706',
 }) {
   const [chartData, setChartData] = useState([]);
   const animFrameRef = useRef(null);
   const frameCountRef = useRef(0);
 
-  // Live mode: read time-domain data at ~15fps
   useEffect(() => {
     if (!live || !audioEngine?.isInitialized) return;
 
@@ -37,7 +31,6 @@ export default function WaveformChart({
         if (data) {
           const sampleRate = audioEngine.getSampleRate();
           const points = [];
-          // Downsample to ~200 points for chart performance
           const step = Math.max(1, Math.floor(data.length / 200));
           for (let i = 0; i < data.length; i += step) {
             points.push({
@@ -60,7 +53,6 @@ export default function WaveformChart({
     };
   }, [live, audioEngine?.isInitialized]);
 
-  // Static mode: format provided waveform data
   useEffect(() => {
     if (staticData && !live) {
       const { samples, sampleRate } = staticData;
@@ -79,32 +71,33 @@ export default function WaveformChart({
   if (chartData.length === 0 && !live) return null;
 
   return (
-    <div className="space-y-2">
-      <h4 className="text-sm font-medium text-clinical-muted">{title}</h4>
-      <div className="bg-clinical-bg rounded-lg p-2 border border-clinical-border">
+    <div className="space-y-1.5">
+      <h4 className="text-xs font-medium text-clinical-muted uppercase tracking-wide">{title}</h4>
+      <div className="bg-clinical-surface rounded p-2 border border-clinical-border">
         <ResponsiveContainer width="100%" height={height}>
           <LineChart data={chartData} margin={{ top: 5, right: 5, bottom: 5, left: -10 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1f293755" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e2e5ea" />
             <XAxis
               dataKey="time"
-              tick={{ fill: '#6b7280', fontSize: 10 }}
+              tick={{ fill: '#7c8494', fontSize: 10 }}
               tickFormatter={(v) => `${parseFloat(v).toFixed(0)}ms`}
-              stroke="#1f2937"
+              stroke="#e2e5ea"
               interval="preserveStartEnd"
             />
             <YAxis
-              tick={{ fill: '#6b7280', fontSize: 10 }}
-              stroke="#1f2937"
+              tick={{ fill: '#7c8494', fontSize: 10 }}
+              stroke="#e2e5ea"
               domain={[-1, 1]}
               tickFormatter={(v) => v.toFixed(1)}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#111827',
-                border: '1px solid #1f2937',
-                borderRadius: '8px',
-                color: '#e5e7eb',
+                backgroundColor: '#ffffff',
+                border: '1px solid #e2e5ea',
+                borderRadius: '4px',
+                color: '#374151',
                 fontSize: '12px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
               }}
               formatter={(value) => [`${Number(value).toFixed(4)}`, 'Amplitude']}
               labelFormatter={(label) => `${label} ms`}

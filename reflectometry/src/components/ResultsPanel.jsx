@@ -3,11 +3,6 @@ import { RotateCcw, ArrowRight, Activity, Clock, Layers, Filter } from 'lucide-r
 import TympanogramChart from './TympanogramChart';
 import WaveformChart from './WaveformChart';
 
-/**
- * Step 3: Results panel.
- * Displays reflectivity data, adaptive filter info, waveforms,
- * session history, and overlay toggle.
- */
 export default function ResultsPanel({
   results,
   sessionHistory = [],
@@ -23,7 +18,6 @@ export default function ResultsPanel({
 
   const { reflectivity, bands, ear, adaptiveFilter, lastCaptureWaveform, lastEmittedWaveform, sampleRate } = results;
 
-  // Get previous test for overlay (most recent before current, same ear)
   const previousTests = sessionHistory.filter(
     (r) => r.timestamp < results.timestamp && r.ear === ear
   );
@@ -35,7 +29,6 @@ export default function ResultsPanel({
     ? previousTest.reflectivity
     : null;
 
-  // Selected history item for comparison
   const historyItem = selectedHistoryIdx !== null
     ? sessionHistory[selectedHistoryIdx]
     : null;
@@ -44,12 +37,12 @@ export default function ResultsPanel({
     <div className="panel-enter space-y-6">
       {/* Header */}
       <div className="text-center space-y-3">
-        <div className="mx-auto w-20 h-20 rounded-2xl flex items-center justify-center bg-clinical-accent/10">
-          <Activity className="w-10 h-10 text-clinical-accent" />
+        <div className="mx-auto w-16 h-16 rounded-lg flex items-center justify-center bg-clinical-accent/8">
+          <Activity className="w-8 h-8 text-clinical-accent" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-clinical-heading">
-            Reflectometry Results
+          <h2 className="text-xl font-semibold text-clinical-heading">
+            Results
           </h2>
           <p className="text-sm text-clinical-muted mt-1 capitalize">
             {ear} ear
@@ -74,9 +67,9 @@ export default function ResultsPanel({
       {previousTest && (
         <button
           onClick={() => setShowOverlay(!showOverlay)}
-          className={`w-full py-2 px-3 rounded-lg border text-xs font-medium flex items-center justify-center gap-2 transition-all ${
+          className={`w-full py-2 px-3 rounded-md border text-xs font-medium flex items-center justify-center gap-2 transition-all ${
             showOverlay
-              ? 'border-clinical-accent bg-clinical-accent/10 text-clinical-accent'
+              ? 'border-clinical-accent bg-clinical-accent/8 text-clinical-accent'
               : 'border-clinical-border bg-clinical-surface text-clinical-muted hover:border-clinical-muted'
           }`}
         >
@@ -85,7 +78,7 @@ export default function ResultsPanel({
         </button>
       )}
 
-      {/* Reflectivity Chart (with optional overlay) */}
+      {/* Reflectivity Chart */}
       <TympanogramChart
         reflectivityData={reflectivity}
         overlayData={overlayData}
@@ -102,10 +95,10 @@ export default function ResultsPanel({
         ].map((band) => (
           <div
             key={band.label}
-            className="bg-clinical-surface border border-clinical-border rounded-xl p-3 text-center"
+            className="bg-clinical-surface border border-clinical-border rounded-md p-3 text-center"
           >
-            <p className="text-xs text-clinical-muted">{band.label}</p>
-            <p className="text-lg font-bold text-clinical-heading mt-0.5">
+            <p className="text-[10px] text-clinical-muted uppercase tracking-wide">{band.label}</p>
+            <p className="text-lg font-semibold text-clinical-heading mt-0.5">
               {Math.round(band.value * 100)}%
             </p>
             <p className="text-[10px] text-clinical-muted">{band.sublabel}</p>
@@ -122,7 +115,7 @@ export default function ResultsPanel({
           }}
           title="Captured Waveform"
           height={120}
-          color="#f59e0b"
+          color="#d97706"
         />
       )}
 
@@ -135,7 +128,7 @@ export default function ResultsPanel({
           }}
           title="Emitted Chirp"
           height={100}
-          color="#8b5cf6"
+          color="#7c3aed"
         />
       )}
 
@@ -144,7 +137,7 @@ export default function ResultsPanel({
         <div className="space-y-3">
           <button
             onClick={() => setShowHistory(!showHistory)}
-            className="w-full py-2 px-3 rounded-lg border border-clinical-border bg-clinical-surface text-xs font-medium flex items-center justify-center gap-2 text-clinical-muted hover:border-clinical-muted transition-all"
+            className="w-full py-2 px-3 rounded-md border border-clinical-border bg-clinical-surface text-xs font-medium flex items-center justify-center gap-2 text-clinical-muted hover:border-clinical-muted transition-all"
           >
             <Clock className="w-3.5 h-3.5" />
             Session History ({sessionHistory.length} tests)
@@ -165,11 +158,11 @@ export default function ResultsPanel({
                       setSelectedHistoryIdx(isSelected ? null : idx);
                     }}
                     disabled={isCurrent}
-                    className={`w-full text-left p-3 rounded-lg border text-xs transition-all ${
+                    className={`w-full text-left p-3 rounded-md border text-xs transition-all ${
                       isCurrent
                         ? 'border-clinical-accent/30 bg-clinical-accent/5 text-clinical-accent'
                         : isSelected
-                          ? 'border-clinical-accent bg-clinical-accent/10 text-clinical-accent'
+                          ? 'border-clinical-accent bg-clinical-accent/8 text-clinical-accent'
                           : 'border-clinical-border bg-clinical-surface text-clinical-muted hover:border-clinical-muted'
                     }`}
                   >
@@ -191,7 +184,6 @@ export default function ResultsPanel({
             </div>
           )}
 
-          {/* Comparison view */}
           {historyItem && (
             <div className="space-y-3">
               <h4 className="text-xs font-medium text-clinical-muted text-center">
@@ -213,14 +205,14 @@ export default function ResultsPanel({
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={onTestAgain}
-            className="py-3 px-4 bg-clinical-accent hover:bg-clinical-accent-dim text-white font-semibold rounded-xl transition-colors text-sm flex items-center justify-center gap-2"
+            className="py-3 px-4 bg-clinical-accent hover:bg-clinical-accent-dim text-white font-medium rounded-md transition-colors text-sm flex items-center justify-center gap-2"
           >
             <RotateCcw className="w-4 h-4" />
             Test Again
           </button>
           <button
             onClick={onTestOtherEar}
-            className="py-3 px-4 bg-clinical-surface border border-clinical-accent text-clinical-accent hover:bg-clinical-accent/10 font-semibold rounded-xl transition-colors text-sm flex items-center justify-center gap-2"
+            className="py-3 px-4 bg-clinical-surface border border-clinical-accent text-clinical-accent hover:bg-clinical-accent/5 font-medium rounded-md transition-colors text-sm flex items-center justify-center gap-2"
           >
             Other Ear
             <ArrowRight className="w-4 h-4" />
@@ -228,7 +220,7 @@ export default function ResultsPanel({
         </div>
         <button
           onClick={onRecalibrate}
-          className="w-full py-2.5 px-4 border border-clinical-border text-clinical-muted hover:text-clinical-text hover:border-clinical-muted rounded-xl transition-colors text-sm"
+          className="w-full py-2.5 px-4 border border-clinical-border text-clinical-muted hover:text-clinical-text hover:border-clinical-muted rounded-md transition-colors text-sm"
         >
           New Calibration
         </button>

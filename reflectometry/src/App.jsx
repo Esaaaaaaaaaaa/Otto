@@ -48,13 +48,12 @@ export default function App() {
   return (
     <div className="min-h-dvh bg-clinical-bg">
       {/* Top bar */}
-      <header className="sticky top-0 z-10 bg-clinical-bg/80 backdrop-blur-lg border-b border-clinical-border">
-        <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
+      <header className="sticky top-0 z-10 bg-clinical-surface/90 backdrop-blur-lg border-b border-clinical-border">
+        <div className="max-w-lg mx-auto px-4 py-3 flex items-center">
           <div className="flex items-center gap-2">
             <Activity className="w-5 h-5 text-clinical-accent" />
-            <h1 className="text-base font-bold text-clinical-heading">Otto</h1>
+            <h1 className="text-base font-semibold text-clinical-heading tracking-tight">Otto</h1>
           </div>
-          <span className="text-xs text-clinical-muted">Acoustic Reflectometry</span>
         </div>
       </header>
 
@@ -74,9 +73,9 @@ export default function App() {
                   }`} />
                 )}
                 <span
-                  className={`text-xs font-medium px-3 py-1.5 rounded-full transition-all ${
+                  className={`text-xs font-medium px-3 py-1.5 rounded transition-all ${
                     isActive
-                      ? 'bg-clinical-accent/15 text-clinical-accent'
+                      ? 'bg-clinical-accent/10 text-clinical-accent'
                       : isCompleted
                         ? 'text-clinical-accent'
                         : 'text-clinical-muted'

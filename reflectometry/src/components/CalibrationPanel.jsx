@@ -4,32 +4,25 @@ import SignalIndicator from './SignalIndicator';
 import FrequencyChart from './FrequencyChart';
 import WaveformChart from './WaveformChart';
 
-/**
- * Step 1: Calibration panel.
- * Guided noise check → calibration → quality indicator.
- */
 export default function CalibrationPanel({
   audioEngine,
   analysis,
   onComplete,
 }) {
   const [progress, setProgress] = useState(0);
-  const [status, setStatus] = useState('idle'); // idle | initializing | noise_check | calibrating | done | error
+  const [status, setStatus] = useState('idle');
   const [errorMsg, setErrorMsg] = useState('');
 
   const handleStart = async () => {
     try {
-      // Initialize audio engine if needed
       if (!audioEngine.isInitialized) {
         setStatus('initializing');
         await audioEngine.initialize();
       }
 
-      // Step 0: Noise check
       setStatus('noise_check');
       await analysis.measureNoise(audioEngine);
 
-      // Step 1: Calibration
       setStatus('calibrating');
       setProgress(0);
 
@@ -59,10 +52,10 @@ export default function CalibrationPanel({
 
   const getQualityColor = (rating) => {
     switch (rating) {
-      case 'excellent': return 'text-clinical-success border-clinical-success/30 bg-clinical-success/10';
-      case 'good': return 'text-clinical-success border-clinical-success/30 bg-clinical-success/10';
-      case 'fair': return 'text-clinical-warning border-clinical-warning/30 bg-clinical-warning/10';
-      case 'poor': return 'text-clinical-danger border-clinical-danger/30 bg-clinical-danger/10';
+      case 'excellent': return 'text-clinical-success border-clinical-success/30 bg-clinical-success/5';
+      case 'good': return 'text-clinical-success border-clinical-success/30 bg-clinical-success/5';
+      case 'fair': return 'text-clinical-warning border-clinical-warning/30 bg-clinical-warning/5';
+      case 'poor': return 'text-clinical-danger border-clinical-danger/30 bg-clinical-danger/5';
       default: return 'text-clinical-muted border-clinical-border bg-clinical-surface';
     }
   };
@@ -71,19 +64,19 @@ export default function CalibrationPanel({
     <div className="panel-enter space-y-6">
       {/* Header */}
       <div className="text-center space-y-2">
-        <div className="mx-auto w-16 h-16 rounded-2xl bg-clinical-accent/10 flex items-center justify-center">
-          <Mic className="w-8 h-8 text-clinical-accent" />
+        <div className="mx-auto w-14 h-14 rounded-lg bg-clinical-accent/8 flex items-center justify-center">
+          <Mic className="w-7 h-7 text-clinical-accent" />
         </div>
-        <h2 className="text-xl font-bold text-clinical-heading">Calibration</h2>
+        <h2 className="text-xl font-semibold text-clinical-heading">Calibration</h2>
         <p className="text-sm text-clinical-muted max-w-sm mx-auto">
-          First, we need to capture a reference measurement in open air to calibrate for your device.
+          Capture a reference measurement in open air to calibrate for your device.
         </p>
       </div>
 
       {/* Instructions */}
       {status === 'idle' && (
-        <div className="bg-clinical-accent/5 border border-clinical-accent/20 rounded-xl p-4 space-y-3">
-          <h3 className="text-sm font-semibold text-clinical-accent">Instructions</h3>
+        <div className="bg-clinical-accent/5 border border-clinical-accent/15 rounded-md p-4 space-y-3">
+          <h3 className="text-sm font-medium text-clinical-accent">Instructions</h3>
           <ol className="text-sm text-clinical-text space-y-2 list-decimal list-inside">
             <li>Hold the phone at arm&apos;s length in open air</li>
             <li>Make sure the environment is relatively quiet</li>
@@ -95,7 +88,7 @@ export default function CalibrationPanel({
 
       {/* Error from audio engine */}
       {audioEngine.error && (
-        <div className="bg-clinical-danger/10 border border-clinical-danger/30 rounded-xl p-4 flex items-start gap-3">
+        <div className="bg-clinical-danger/5 border border-clinical-danger/20 rounded-md p-4 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-clinical-danger flex-shrink-0 mt-0.5" />
           <p className="text-sm text-clinical-danger">{audioEngine.error}</p>
         </div>
@@ -103,7 +96,7 @@ export default function CalibrationPanel({
 
       {/* Calibration error */}
       {status === 'error' && (
-        <div className="bg-clinical-danger/10 border border-clinical-danger/30 rounded-xl p-4 flex items-start gap-3">
+        <div className="bg-clinical-danger/5 border border-clinical-danger/20 rounded-md p-4 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-clinical-danger flex-shrink-0 mt-0.5" />
           <p className="text-sm text-clinical-danger">{errorMsg}</p>
         </div>
@@ -122,8 +115,8 @@ export default function CalibrationPanel({
 
       {/* Noise profile result */}
       {noiseProfile && (status === 'calibrating' || status === 'done') && (
-        <div className="bg-clinical-surface border border-clinical-border rounded-xl p-3 flex items-center gap-3">
-          <Volume2 className={`w-5 h-5 flex-shrink-0 ${getNoiseColor(noiseProfile.quality)}`} />
+        <div className="bg-clinical-surface border border-clinical-border rounded-md p-3 flex items-center gap-3">
+          <Volume2 className={`w-4 h-4 flex-shrink-0 ${getNoiseColor(noiseProfile.quality)}`} />
           <div className="flex-1 min-w-0">
             <p className={`text-sm font-medium ${getNoiseColor(noiseProfile.quality)}`}>
               Noise: {noiseProfile.quality}
@@ -142,14 +135,13 @@ export default function CalibrationPanel({
               {status === 'initializing' ? 'Setting up microphone...' : `Calibrating... ${Math.round(progress * 100)}%`}
             </span>
           </div>
-          <div className="h-2 bg-clinical-border rounded-full overflow-hidden">
+          <div className="h-1.5 bg-clinical-border rounded overflow-hidden">
             <div
-              className="h-full bg-clinical-accent rounded-full transition-all duration-300"
+              className="h-full bg-clinical-accent rounded transition-all duration-300"
               style={{ width: `${progress * 100}%` }}
             />
           </div>
           <SignalIndicator audioEngine={audioEngine} active={true} />
-          {/* Dual viz: waveform + frequency */}
           <WaveformChart audioEngine={audioEngine} live={true} title="Waveform" height={120} />
           <FrequencyChart audioEngine={audioEngine} live={true} title="Frequency Spectrum" height={120} />
         </div>
@@ -157,25 +149,24 @@ export default function CalibrationPanel({
 
       {/* Calibration quality indicator */}
       {status === 'done' && calQuality && (
-        <div className={`border rounded-xl p-4 space-y-3 ${getQualityColor(calQuality.rating)}`}>
+        <div className={`border rounded-md p-4 space-y-3 ${getQualityColor(calQuality.rating)}`}>
           <div className="flex items-center gap-2">
-            <Shield className="w-5 h-5 flex-shrink-0" />
+            <Shield className="w-4 h-4 flex-shrink-0" />
             <div>
-              <p className="text-sm font-semibold capitalize">
+              <p className="text-sm font-medium capitalize">
                 Calibration: {calQuality.rating}
               </p>
-              <p className="text-xs opacity-80">{calQuality.message}</p>
+              <p className="text-xs opacity-75">{calQuality.message}</p>
             </div>
           </div>
-          {/* Consistency bar */}
           <div className="space-y-1">
             <div className="flex justify-between text-xs">
               <span>Consistency</span>
               <span>{Math.round(calQuality.consistency * 100)}%</span>
             </div>
-            <div className="h-2 bg-black/20 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-black/10 rounded overflow-hidden">
               <div
-                className="h-full rounded-full transition-all duration-500 bg-current opacity-60"
+                className="h-full rounded transition-all duration-500 bg-current opacity-50"
                 style={{ width: `${calQuality.consistency * 100}%` }}
               />
             </div>
@@ -185,7 +176,7 @@ export default function CalibrationPanel({
 
       {/* Success message */}
       {status === 'done' && (
-        <div className="bg-clinical-success/10 border border-clinical-success/30 rounded-xl p-4 flex items-start gap-3">
+        <div className="bg-clinical-success/5 border border-clinical-success/20 rounded-md p-4 flex items-start gap-3">
           <CheckCircle className="w-5 h-5 text-clinical-success flex-shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-medium text-clinical-success">Calibration complete</p>
@@ -202,14 +193,14 @@ export default function CalibrationPanel({
           <button
             onClick={handleStart}
             disabled={status === 'calibrating' || status === 'initializing' || status === 'noise_check'}
-            className="w-full py-4 px-6 bg-clinical-accent hover:bg-clinical-accent-dim disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors text-base"
+            className="w-full py-3.5 px-6 bg-clinical-accent hover:bg-clinical-accent-dim disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-md transition-colors text-sm"
           >
             {status === 'idle' || status === 'error' ? 'Start Calibration' : 'Calibrating...'}
           </button>
         ) : (
           <button
             onClick={onComplete}
-            className="w-full py-4 px-6 bg-clinical-accent hover:bg-clinical-accent-dim text-white font-semibold rounded-xl transition-colors text-base"
+            className="w-full py-3.5 px-6 bg-clinical-accent hover:bg-clinical-accent-dim text-white font-medium rounded-md transition-colors text-sm"
           >
             Proceed to Test
           </button>
