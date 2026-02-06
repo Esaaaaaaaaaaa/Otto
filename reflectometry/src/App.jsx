@@ -112,6 +112,7 @@ export default function App() {
         {step === 'results' && (
           <ResultsPanel
             results={analysis.testResults}
+            sessionHistory={analysis.sessionHistory}
             onTestAgain={handleTestAgain}
             onTestOtherEar={handleTestOtherEar}
             onRecalibrate={handleRecalibrate}

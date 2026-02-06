@@ -3,10 +3,11 @@ import { Ear, Loader2, AlertCircle } from 'lucide-react';
 import { SPECULA_PRESETS } from '../lib/audio/speculaCompensation';
 import SignalIndicator from './SignalIndicator';
 import FrequencyChart from './FrequencyChart';
+import WaveformChart from './WaveformChart';
 
 /**
  * Step 2: Test panel.
- * Select ear + speculum type, then test.
+ * Select ear + speculum type, then test with dual real-time viz.
  */
 export default function TestPanel({
   audioEngine,
@@ -27,7 +28,7 @@ export default function TestPanel({
 
       const results = await analysis.runTest(audioEngine, (p) => {
         setProgress(p);
-      }, ear, 5, specula);
+      }, ear, null, specula);
 
       onComplete(results);
     } catch (err) {
@@ -48,6 +49,20 @@ export default function TestPanel({
           Attach the speculum, position against the ear canal, and tap test.
         </p>
       </div>
+
+      {/* Noise info badge */}
+      {analysis.noiseProfile && (
+        <div className="flex items-center justify-center gap-2 text-xs text-clinical-muted">
+          <span className={`inline-block w-2 h-2 rounded-full ${
+            analysis.noiseProfile.quality === 'excellent' || analysis.noiseProfile.quality === 'good'
+              ? 'bg-clinical-success'
+              : analysis.noiseProfile.quality === 'acceptable'
+                ? 'bg-clinical-warning'
+                : 'bg-clinical-danger'
+          }`} />
+          <span>Adaptive filtering active — noise: {analysis.noiseProfile.quality}</span>
+        </div>
+      )}
 
       {/* Ear selector */}
       <div className="space-y-2">
@@ -101,7 +116,7 @@ export default function TestPanel({
         </div>
       )}
 
-      {/* Testing progress */}
+      {/* Testing progress + dual viz */}
       {status === 'testing' && (
         <div className="space-y-4">
           <div className="flex items-center justify-center gap-2 text-clinical-accent">
@@ -117,7 +132,9 @@ export default function TestPanel({
             />
           </div>
           <SignalIndicator audioEngine={audioEngine} active={true} />
-          <FrequencyChart audioEngine={audioEngine} live={true} title="Live Capture" height={160} />
+          {/* Dual real-time viz: waveform + frequency as two separate graphs */}
+          <WaveformChart audioEngine={audioEngine} live={true} title="Waveform" height={120} />
+          <FrequencyChart audioEngine={audioEngine} live={true} title="Frequency Spectrum" height={120} />
         </div>
       )}
 

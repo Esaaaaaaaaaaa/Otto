@@ -7,13 +7,19 @@ import {
   CartesianGrid,
   ResponsiveContainer,
   Tooltip,
+  Legend,
 } from 'recharts';
 
 /**
- * Reflectivity chart.
+ * Reflectivity chart with optional overlay of previous test.
  * Displays the raw reflectivity curve across frequency.
  */
-export default function TympanogramChart({ reflectivityData, height = 250 }) {
+export default function TympanogramChart({
+  reflectivityData,
+  overlayData = null,
+  overlayLabel = 'Previous',
+  height = 250,
+}) {
   if (!reflectivityData) return null;
 
   const { frequencies, reflectivity } = reflectivityData;
@@ -21,11 +27,30 @@ export default function TympanogramChart({ reflectivityData, height = 250 }) {
   // Build chart data, sampling every few points to keep it smooth
   const chartData = [];
   const step = Math.max(1, Math.floor(frequencies.length / 80));
+
+  // Build overlay lookup if present
+  let overlayMap = null;
+  if (overlayData) {
+    overlayMap = new Map();
+    const oStep = Math.max(1, Math.floor(overlayData.frequencies.length / 80));
+    for (let i = 0; i < overlayData.frequencies.length; i += oStep) {
+      overlayMap.set(
+        Math.round(overlayData.frequencies[i]),
+        Number((overlayData.reflectivity[i] * 100).toFixed(1))
+      );
+    }
+  }
+
   for (let i = 0; i < frequencies.length; i += step) {
-    chartData.push({
-      frequency: frequencies[i],
+    const freq = Math.round(frequencies[i]);
+    const point = {
+      frequency: freq,
       reflectivity: Number((reflectivity[i] * 100).toFixed(1)),
-    });
+    };
+    if (overlayMap) {
+      point.previous = overlayMap.get(freq) ?? null;
+    }
+    chartData.push(point);
   }
 
   return (
@@ -67,12 +92,36 @@ export default function TympanogramChart({ reflectivityData, height = 250 }) {
                 color: '#e5e7eb',
                 fontSize: '12px',
               }}
-              formatter={(value) => [`${value}%`, 'Reflectivity']}
+              formatter={(value, name) => [
+                `${value}%`,
+                name === 'previous' ? overlayLabel : 'Current',
+              ]}
               labelFormatter={(label) => `${label} Hz`}
             />
+            {overlayData && (
+              <Legend
+                wrapperStyle={{ fontSize: '11px', color: '#9ca3af' }}
+              />
+            )}
+            {/* Previous test overlay (behind current) */}
+            {overlayData && (
+              <Line
+                type="monotone"
+                dataKey="previous"
+                name={overlayLabel}
+                stroke="#6b7280"
+                strokeWidth={1.5}
+                strokeDasharray="5 5"
+                dot={false}
+                isAnimationActive={false}
+                connectNulls
+              />
+            )}
+            {/* Current test */}
             <Line
               type="monotone"
               dataKey="reflectivity"
+              name="Current"
               stroke="#14b8a6"
               strokeWidth={2.5}
               dot={false}

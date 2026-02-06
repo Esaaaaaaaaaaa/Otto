@@ -1,20 +1,44 @@
-import React from 'react';
-import { RotateCcw, ArrowRight, Activity } from 'lucide-react';
+import React, { useState } from 'react';
+import { RotateCcw, ArrowRight, Activity, Clock, Layers, Filter } from 'lucide-react';
 import TympanogramChart from './TympanogramChart';
+import WaveformChart from './WaveformChart';
 
 /**
  * Step 3: Results panel.
- * Displays raw reflectivity data — charts and band values only.
+ * Displays reflectivity data, adaptive filter info, waveforms,
+ * session history, and overlay toggle.
  */
 export default function ResultsPanel({
   results,
+  sessionHistory = [],
   onTestAgain,
   onTestOtherEar,
   onRecalibrate,
 }) {
+  const [showOverlay, setShowOverlay] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [selectedHistoryIdx, setSelectedHistoryIdx] = useState(null);
+
   if (!results) return null;
 
-  const { reflectivity, bands, ear } = results;
+  const { reflectivity, bands, ear, adaptiveFilter, lastCaptureWaveform, lastEmittedWaveform, sampleRate } = results;
+
+  // Get previous test for overlay (most recent before current, same ear)
+  const previousTests = sessionHistory.filter(
+    (r) => r.timestamp < results.timestamp && r.ear === ear
+  );
+  const previousTest = previousTests.length > 0
+    ? previousTests[previousTests.length - 1]
+    : null;
+
+  const overlayData = showOverlay && previousTest
+    ? previousTest.reflectivity
+    : null;
+
+  // Selected history item for comparison
+  const historyItem = selectedHistoryIdx !== null
+    ? sessionHistory[selectedHistoryIdx]
+    : null;
 
   return (
     <div className="panel-enter space-y-6">
@@ -33,9 +57,39 @@ export default function ResultsPanel({
         </div>
       </div>
 
-      {/* Reflectivity Chart */}
+      {/* Adaptive filter convergence badge */}
+      {adaptiveFilter && (
+        <div className={`flex items-center gap-2 justify-center text-xs ${
+          adaptiveFilter.converged ? 'text-clinical-success' : 'text-clinical-warning'
+        }`}>
+          <Filter className="w-3.5 h-3.5" />
+          <span>
+            Adaptive filter {adaptiveFilter.converged ? 'converged' : 'adapting'}
+            {' '}— MSE: {adaptiveFilter.finalMSE.toExponential(1)}
+          </span>
+        </div>
+      )}
+
+      {/* Overlay toggle */}
+      {previousTest && (
+        <button
+          onClick={() => setShowOverlay(!showOverlay)}
+          className={`w-full py-2 px-3 rounded-lg border text-xs font-medium flex items-center justify-center gap-2 transition-all ${
+            showOverlay
+              ? 'border-clinical-accent bg-clinical-accent/10 text-clinical-accent'
+              : 'border-clinical-border bg-clinical-surface text-clinical-muted hover:border-clinical-muted'
+          }`}
+        >
+          <Layers className="w-3.5 h-3.5" />
+          {showOverlay ? 'Overlay: ON' : 'Compare with previous test'}
+        </button>
+      )}
+
+      {/* Reflectivity Chart (with optional overlay) */}
       <TympanogramChart
         reflectivityData={reflectivity}
+        overlayData={overlayData}
+        overlayLabel="Previous"
         height={220}
       />
 
@@ -58,6 +112,101 @@ export default function ResultsPanel({
           </div>
         ))}
       </div>
+
+      {/* Captured waveform */}
+      {lastCaptureWaveform && lastCaptureWaveform.length > 0 && (
+        <WaveformChart
+          staticData={{
+            samples: lastCaptureWaveform,
+            sampleRate: sampleRate || 44100,
+          }}
+          title="Captured Waveform"
+          height={120}
+          color="#f59e0b"
+        />
+      )}
+
+      {/* Emitted waveform */}
+      {lastEmittedWaveform && lastEmittedWaveform.length > 0 && (
+        <WaveformChart
+          staticData={{
+            samples: lastEmittedWaveform,
+            sampleRate: sampleRate || 44100,
+          }}
+          title="Emitted Chirp"
+          height={100}
+          color="#8b5cf6"
+        />
+      )}
+
+      {/* Session History */}
+      {sessionHistory.length > 1 && (
+        <div className="space-y-3">
+          <button
+            onClick={() => setShowHistory(!showHistory)}
+            className="w-full py-2 px-3 rounded-lg border border-clinical-border bg-clinical-surface text-xs font-medium flex items-center justify-center gap-2 text-clinical-muted hover:border-clinical-muted transition-all"
+          >
+            <Clock className="w-3.5 h-3.5" />
+            Session History ({sessionHistory.length} tests)
+          </button>
+
+          {showHistory && (
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {sessionHistory.map((item, idx) => {
+                const isSelected = selectedHistoryIdx === idx;
+                const isCurrent = item.timestamp === results.timestamp;
+                const time = new Date(item.timestamp).toLocaleTimeString();
+
+                return (
+                  <button
+                    key={item.timestamp}
+                    onClick={() => {
+                      if (isCurrent) return;
+                      setSelectedHistoryIdx(isSelected ? null : idx);
+                    }}
+                    disabled={isCurrent}
+                    className={`w-full text-left p-3 rounded-lg border text-xs transition-all ${
+                      isCurrent
+                        ? 'border-clinical-accent/30 bg-clinical-accent/5 text-clinical-accent'
+                        : isSelected
+                          ? 'border-clinical-accent bg-clinical-accent/10 text-clinical-accent'
+                          : 'border-clinical-border bg-clinical-surface text-clinical-muted hover:border-clinical-muted'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium capitalize">
+                        {item.ear} ear — {item.speculaType}
+                        {isCurrent && ' (current)'}
+                      </span>
+                      <span>{time}</span>
+                    </div>
+                    <div className="flex gap-3 mt-1 text-[10px]">
+                      <span>Low: {Math.round(item.bands.lowBand * 100)}%</span>
+                      <span>Mid: {Math.round(item.bands.midBand * 100)}%</span>
+                      <span>High: {Math.round(item.bands.highBand * 100)}%</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Comparison view */}
+          {historyItem && (
+            <div className="space-y-3">
+              <h4 className="text-xs font-medium text-clinical-muted text-center">
+                Comparing with {new Date(historyItem.timestamp).toLocaleTimeString()} — {historyItem.ear} ear
+              </h4>
+              <TympanogramChart
+                reflectivityData={historyItem.reflectivity}
+                overlayData={reflectivity}
+                overlayLabel="Current"
+                height={180}
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Action buttons */}
       <div className="space-y-3">

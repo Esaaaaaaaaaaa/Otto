@@ -224,6 +224,69 @@ export function useAudioEngine() {
     setIsCapturing(false);
   }, []);
 
+  /**
+   * Capture microphone input for a given duration without playing anything.
+   * Used for noise floor estimation.
+   *
+   * @param {number} durationMs - Capture duration in milliseconds (default 500)
+   * @returns {Promise<Float32Array>} Captured samples
+   */
+  const captureNoise = useCallback(async (durationMs = 500) => {
+    const ctx = audioContextRef.current;
+    const micSource = micSourceRef.current;
+
+    if (!ctx || !micSource) {
+      throw new Error('Audio engine not initialized');
+    }
+
+    if (ctx.state === 'suspended') {
+      await ctx.resume();
+    }
+
+    setIsCapturing(true);
+
+    try {
+      const capturedChunks = [];
+      const scriptNode = ctx.createScriptProcessor(4096, 1, 1);
+
+      const captureAnalyser = ctx.createAnalyser();
+      captureAnalyser.fftSize = 4096;
+      micSource.connect(captureAnalyser);
+
+      let capturing = true;
+
+      scriptNode.onaudioprocess = (event) => {
+        if (capturing) {
+          const inputData = event.inputBuffer.getChannelData(0);
+          capturedChunks.push(new Float32Array(inputData));
+        }
+      };
+
+      captureAnalyser.connect(scriptNode);
+      scriptNode.connect(ctx.destination);
+
+      await new Promise((resolve) => setTimeout(resolve, durationMs));
+
+      capturing = false;
+      scriptNode.disconnect();
+      captureAnalyser.disconnect(scriptNode);
+
+      const totalLength = capturedChunks.reduce((sum, chunk) => sum + chunk.length, 0);
+      const captured = new Float32Array(totalLength);
+      let offset = 0;
+      for (const chunk of capturedChunks) {
+        captured.set(chunk, offset);
+        offset += chunk.length;
+      }
+
+      setIsCapturing(false);
+      return captured;
+    } catch (err) {
+      setIsCapturing(false);
+      throw err;
+    }
+  }, []);
+
   return {
     isInitialized,
     hasPermission,
@@ -232,6 +295,7 @@ export function useAudioEngine() {
     error,
     initialize,
     playAndCapture,
+    captureNoise,
     getRealtimeFrequencyData,
     getRealtimeTimeDomainData,
     getSampleRate,
