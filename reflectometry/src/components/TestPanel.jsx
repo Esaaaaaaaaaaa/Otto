@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Ear, Loader2, AlertCircle } from 'lucide-react';
+import { SPECULA_PRESETS } from '../lib/audio/speculaCompensation';
 import SignalIndicator from './SignalIndicator';
 import FrequencyChart from './FrequencyChart';
 
 /**
  * Step 2: Test panel.
- * User presses phone to ear canal, emits chirps, captures reflections.
+ * Select ear + speculum type, then test.
  */
 export default function TestPanel({
   audioEngine,
@@ -14,6 +15,7 @@ export default function TestPanel({
   onRecalibrate,
 }) {
   const [ear, setEar] = useState('left');
+  const [specula, setSpecula] = useState('4mm');
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState('idle'); // idle | testing | error
   const [errorMsg, setErrorMsg] = useState('');
@@ -25,7 +27,7 @@ export default function TestPanel({
 
       const results = await analysis.runTest(audioEngine, (p) => {
         setProgress(p);
-      }, ear);
+      }, ear, 5, specula);
 
       onComplete(results);
     } catch (err) {
@@ -43,7 +45,7 @@ export default function TestPanel({
         </div>
         <h2 className="text-xl font-bold text-clinical-heading">Ear Canal Test</h2>
         <p className="text-sm text-clinical-muted max-w-sm mx-auto">
-          Place the phone speaker against the ear canal opening and tap test.
+          Attach the speculum, position against the ear canal, and tap test.
         </p>
       </div>
 
@@ -64,6 +66,28 @@ export default function TestPanel({
                 disabled:opacity-50`}
             >
               {side} Ear
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Speculum selector */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-clinical-text">Speculum Size</label>
+        <div className="grid grid-cols-2 gap-3">
+          {Object.entries(SPECULA_PRESETS).map(([key, preset]) => (
+            <button
+              key={key}
+              onClick={() => setSpecula(key)}
+              disabled={status === 'testing'}
+              className={`py-3 px-4 rounded-xl border-2 text-sm font-semibold transition-all
+                ${specula === key
+                  ? 'border-clinical-accent bg-clinical-accent/10 text-clinical-accent'
+                  : 'border-clinical-border bg-clinical-surface text-clinical-muted hover:border-clinical-muted'
+                }
+                disabled:opacity-50`}
+            >
+              {preset.label}
             </button>
           ))}
         </div>
