@@ -119,12 +119,7 @@ export default function App() {
         )}
       </main>
 
-      {/* Footer disclaimer */}
-      <footer className="max-w-lg mx-auto px-4 pb-8 pt-4">
-        <p className="text-[10px] text-clinical-muted/50 text-center">
-          For educational and screening use only. Not a medical device.
-        </p>
-      </footer>
+      <footer className="max-w-lg mx-auto px-4 pb-8 pt-4" />
     </div>
   );
 }

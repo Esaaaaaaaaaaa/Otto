@@ -69,19 +69,6 @@ export default function TestPanel({
         </div>
       </div>
 
-      {/* Instructions */}
-      {status === 'idle' && (
-        <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-4 space-y-3">
-          <h3 className="text-sm font-semibold text-blue-400">How to position</h3>
-          <ol className="text-sm text-clinical-text space-y-2 list-decimal list-inside">
-            <li>Hold the phone with the speaker facing down</li>
-            <li>Place the bottom edge firmly against the ear canal</li>
-            <li>Create a light seal (don&apos;t press too hard)</li>
-            <li>Hold steady and tap the test button</li>
-          </ol>
-        </div>
-      )}
-
       {/* Error */}
       {status === 'error' && (
         <div className="bg-clinical-danger/10 border border-clinical-danger/30 rounded-xl p-4 flex items-start gap-3">

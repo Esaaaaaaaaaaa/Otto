@@ -1,5 +1,5 @@
 import React from 'react';
-import { RotateCcw, ArrowRight, AlertTriangle, Activity } from 'lucide-react';
+import { RotateCcw, ArrowRight, Activity } from 'lucide-react';
 import TympanogramChart from './TympanogramChart';
 
 /**
@@ -83,24 +83,6 @@ export default function ResultsPanel({
             <p className="text-[10px] text-clinical-muted">{band.sublabel}</p>
           </div>
         ))}
-      </div>
-
-      {/* Clinical Note */}
-      <div className="bg-clinical-surface border border-clinical-border rounded-xl p-4 space-y-2">
-        <h3 className="text-sm font-semibold text-clinical-heading">Clinical Interpretation</h3>
-        <p className="text-sm text-clinical-text leading-relaxed">
-          {classification.clinicalNote}
-        </p>
-      </div>
-
-      {/* Disclaimer */}
-      <div className="bg-clinical-warning/5 border border-clinical-warning/20 rounded-xl p-4 flex items-start gap-3">
-        <AlertTriangle className="w-5 h-5 text-clinical-warning flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-clinical-warning/80">
-          This tool is for educational and screening purposes only. It is not a substitute
-          for formal tympanometry or clinical assessment. Always correlate with otoscopy
-          and clinical findings.
-        </p>
       </div>
 
       {/* Action buttons */}
